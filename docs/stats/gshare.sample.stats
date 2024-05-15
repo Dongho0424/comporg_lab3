@@ -1,0 +1,26 @@
+[*] ----- Starting test bst_array -----
+[*] Your register values should be
+[0, 136, 10380, 0, 0, 0, 1532, 0, 0, 0, 132, 1532, 124, 473, 1780, 126, 99, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1132, 0, 0, 0]
+[*] Your verilog register values are
+[0, 136, 10380, 0, 0, 0, 1532, 0, 0, 0, 132, 1532, 124, 473, 1780, 126, 99, -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1132, 0, 0, 0]
+[Passed]
+[*] ----- Hardware counter stats -----
+[*] CORE_CYCLE: 8266
+[*] NUM_COND_BRANCHES: 1942
+[*] NUM_UNCOND_BRANCHES: 103
+[*] BP_CORRECT: 1229
+[*] BP_INCORRECT: 713
+
+
+[*] ----- Starting test matmul -----
+[*] Your register values should be
+[0, 136, 10244, 0, 0, 0, 0, 0, 0, 0, 36, 0, 128, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[*] Your verilog register values are
+[0, 136, 10244, 0, 0, 0, 0, 0, 0, 0, 36, 0, 128, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+[Passed]
+[*] ----- Hardware counter stats -----
+[*] CORE_CYCLE: 15789
+[*] NUM_COND_BRANCHES: 3272
+[*] NUM_UNCOND_BRANCHES: 1029
+[*] BP_CORRECT: 2609
+[*] BP_INCORRECT: 663
