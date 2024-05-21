@@ -1,0 +1,7 @@
+bin_to_assenbly.py
+sim.vcd
+simple_cpu
+data/*
+.DS_Store
+*.gtkw
+playground.py
