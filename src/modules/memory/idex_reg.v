@@ -22,6 +22,7 @@ module idex_reg #(
   input id_branch,
   input [1:0] id_aluop,
   input id_alusrc,
+  input [1:0] id_u_type,
 
   // mem control
   input id_memread,
@@ -51,6 +52,7 @@ module idex_reg #(
   output reg [1:0] ex_aluop,
   output reg ex_alusrc,
   output reg [1:0] ex_jump,
+  output reg [1:0] ex_u_type,
 
   // mem control
   output reg ex_memread,
@@ -83,6 +85,7 @@ always @(posedge clk) begin
     ex_memwrite <= 32'b0;
     ex_memtoreg <= 32'b0;
     ex_regwrite <= 32'b0;
+    ex_u_type <= 32'b0;
     ex_sextimm <= 32'b0;
     ex_funct7 <= 32'b0;
     ex_funct3 <= 32'b0;
@@ -103,6 +106,7 @@ always @(posedge clk) begin
     ex_memwrite <= id_memwrite;
     ex_memtoreg <= id_memtoreg;
     ex_regwrite <= id_regwrite;
+    ex_u_type <= id_u_type;
     ex_sextimm <= id_sextimm;
     ex_funct7 <= id_funct7;
     ex_funct3 <= id_funct3;
@@ -121,6 +125,7 @@ always @(posedge clk) begin
     ex_memwrite <= 32'b0;
     ex_memtoreg <= 32'b0;
     ex_regwrite <= 32'b0;
+    ex_u_type <= 32'b0;
   end
 end
 

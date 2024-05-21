@@ -112,7 +112,8 @@ def check_sim(tests, test_type):
             os.system("rm ./data/inst.mem ./data/stat.out")
         else:
             print("------ [Failed] -----")
-            os.system("cat ./data/stat.out")
+            #FIXME: revoke this line
+            # os.system("cat ./data/stat.out")
             break
 
 

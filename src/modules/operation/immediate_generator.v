@@ -32,8 +32,10 @@ always @(*) begin
     7'b0000011: sextimm = {{20{funct7[6]}}, funct7, rs2}; // Load, 12
     7'b0100011: sextimm = {{20{funct7[6]}}, funct7, rd}; // Store, 12
     7'b1100011: sextimm = {{19{funct7[6]}}, funct7[6], rd[0], funct7[5:0], rd[4:1], 1'b0}; // Branch, 13
-    7'b1101111: sextimm = {{11{funct7[6]}}, funct7[6], rs1, funct3, rs2[0], funct7[5:0], rs2[4:1], 1'b0}; // jaㅣ, 21
+    7'b1101111: sextimm = {{11{funct7[6]}}, funct7[6], rs1, funct3, rs2[0], funct7[5:0], rs2[4:1], 1'b0}; // jal, 21
     7'b1100111: sextimm = {{20{funct7[6]}}, funct7, rs2}; // jalr, 12
+    7'b0110111: sextimm = {instruction[31:12], {12{1'b0}}}; // lui, left shift 20
+    7'b0010111: sextimm = {instruction[31:12], {12{1'b0}}}; // auipc, left shift 20
     default:    sextimm = 32'h0000_0000;
   endcase
 end

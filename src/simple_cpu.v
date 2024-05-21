@@ -63,6 +63,7 @@ wire id_memtoreg;
 wire [1:0] id_aluop;
 wire id_memwrite;
 wire id_alusrc;
+wire [1:0] id_u_type;
 
 // signed extended immediate
 wire [DATA_WIDTH-1:0] id_sextimm;
@@ -79,6 +80,8 @@ wire ifid_write;
 
 wire [DATA_WIDTH-1:0] ex_PC;
 wire [DATA_WIDTH-1:0] ex_pc_plus_4;
+
+// ex controls
 wire [1:0] ex_jump;
 wire ex_branch;
 wire [1:0] ex_aluop;
@@ -87,6 +90,8 @@ wire ex_memread;
 wire ex_memwrite;
 wire ex_memtoreg;
 wire ex_regwrite;
+wire [1:0] ex_u_type;
+
 wire [DATA_WIDTH-1:0] ex_sextimm;
 wire [6:0] ex_funct7;
 wire [2:0] ex_funct3;
@@ -105,6 +110,7 @@ wire [DATA_WIDTH-1:0] ex_alu_result;
 wire [3:0] ex_alu_func;
 wire [DATA_WIDTH-1:0] ex_alu_in_a;
 wire [DATA_WIDTH-1:0] ex_alu_in_b;
+wire [DATA_WIDTH-1:0] ex_alu_in_a_temp;
 wire [DATA_WIDTH-1:0] ex_alu_in_b_temp;
 
 // forwarding
@@ -252,7 +258,8 @@ control m_control(
   .mem_read   (id_memread),
   .mem_to_reg (id_memtoreg),
   .mem_write  (id_memwrite),
-  .reg_write  (id_regwrite)
+  .reg_write  (id_regwrite),
+  .u_type     (id_u_type)
 );
 
 /* m_imm_generator: immediate generator */
@@ -290,6 +297,7 @@ idex_reg m_idex_reg(
   .id_memwrite  (id_memwrite),
   .id_memtoreg  (id_memtoreg),
   .id_regwrite  (id_regwrite),
+  .id_u_type    (id_u_type),
   .id_sextimm   (id_sextimm),
   .id_funct7    (id_funct7),
   .id_funct3    (id_funct3),
@@ -309,6 +317,7 @@ idex_reg m_idex_reg(
   .ex_memwrite  (ex_memwrite),
   .ex_memtoreg  (ex_memtoreg),
   .ex_regwrite  (ex_regwrite),
+  .ex_u_type    (ex_u_type),
   .ex_sextimm   (ex_sextimm),
   .ex_funct7    (ex_funct7),
   .ex_funct3    (ex_funct3),
@@ -374,6 +383,16 @@ alu m_alu(
   .check    (ex_check)
 );
 
+// mux 3x1 for alu in_a source
+mux_3x1 m_u_type_mux(
+  .select  (ex_u_type),
+  .in1  (ex_alu_in_a_temp), // otherwise
+  .in2  (32'h0000_0000), // lui
+  .in3  (ex_PC), // auipc
+
+  .out  (ex_alu_in_a)
+);
+
 // mux 2x1 for alu in_b source
 mux_2x1 m_alu_src_mux(
   .select  (ex_alusrc),
@@ -390,7 +409,7 @@ mux_3x1 m_forward_a_mux(
   .in2  (mem_alu_result),
   .in3  (wb_writedata),
 
-  .out  (ex_alu_in_a)
+  .out  (ex_alu_in_a_temp)
 );
 
 mux_3x1 m_forward_b_mux(
