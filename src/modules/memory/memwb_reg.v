@@ -5,7 +5,7 @@
 module memwb_reg #(
   parameter DATA_WIDTH = 32
 )(
-  // TODO: Add flush or stall signal if it is needed
+  // \TODO: Add flush or stall signal if it is needed
 
   //////////////////////////////////////
   // Inputs
@@ -26,18 +26,27 @@ module memwb_reg #(
   //////////////////////////////////////
   // Outputs
   //////////////////////////////////////
-  output [DATA_WIDTH-1:0] wb_pc_plus_4,
+  output reg [DATA_WIDTH-1:0] wb_pc_plus_4,
 
   // wb control
-  output [1:0] wb_jump,
-  output wb_memtoreg,
-  output wb_regwrite,
+  output reg [1:0] wb_jump,
+  output reg wb_memtoreg,
+  output reg wb_regwrite,
   
-  output [DATA_WIDTH-1:0] wb_readdata,
-  output [DATA_WIDTH-1:0] wb_alu_result,
-  output [4:0] wb_rd
+  output reg [DATA_WIDTH-1:0] wb_readdata,
+  output reg [DATA_WIDTH-1:0] wb_alu_result,
+  output reg [4:0] wb_rd
 );
 
-// TODO: Implement MEM/WB pipeline register module
+// \TODO: Implement MEM/WB pipeline register module
+always @(posedge clk) begin
+  wb_pc_plus_4 <= mem_pc_plus_4;
+  wb_jump <= mem_jump;
+  wb_memtoreg <= mem_memtoreg;
+  wb_regwrite <= mem_regwrite;
+  wb_readdata <= mem_readdata;
+  wb_alu_result <= mem_alu_result;
+  wb_rd <= mem_rd;
+end
 
 endmodule

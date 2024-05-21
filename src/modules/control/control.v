@@ -22,10 +22,16 @@ reg [9:0] controls;
 always @(*) begin
   case (opcode)
     7'b0110011: controls = 10'b00_000_10_001; // R-type
-
+    
     //////////////////////////////////////////////////////////////////////////
-    // TODO : Implement signals for other instruction types
+    // \TODO : Implement signals for other instruction types
     //////////////////////////////////////////////////////////////////////////
+    7'b0010011: controls = 10'b00_000_11_011; // I-type
+    7'b0000011: controls = 10'b00_011_00_011; // Load
+    7'b0100011: controls = 10'b00_00x_00_110; // Store
+    7'b1100011: controls = 10'b01_10x_01_000; // Branch
+    7'b1101111: controls = 10'b10_000_11_011; // jal. assign jump = 2'b10
+    7'b1100111: controls = 10'b11_000_11_011; // jalr. assign jump = 2'b11
 
     default:    controls = 10'b00_000_00_000;
   endcase

@@ -5,7 +5,9 @@
 module idex_reg #(
   parameter DATA_WIDTH = 32
 )(
-  // TODO: Add flush or stall signal if it is needed
+  // \TODO: Add flush or stall signal if it is needed
+  input flush,
+  input idex_write,
 
   //////////////////////////////////////
   // Inputs
@@ -41,33 +43,85 @@ module idex_reg #(
   //////////////////////////////////////
   // Outputs
   //////////////////////////////////////
-  output [DATA_WIDTH-1:0] ex_PC,
-  output [DATA_WIDTH-1:0] ex_pc_plus_4,
+  output reg [DATA_WIDTH-1:0] ex_PC,
+  output reg [DATA_WIDTH-1:0] ex_pc_plus_4,
 
   // ex control
-  output ex_branch,
-  output [1:0] ex_aluop,
-  output ex_alusrc,
-  output [1:0] ex_jump,
+  output reg ex_branch,
+  output reg [1:0] ex_aluop,
+  output reg ex_alusrc,
+  output reg [1:0] ex_jump,
 
   // mem control
-  output ex_memread,
-  output ex_memwrite,
+  output reg ex_memread,
+  output reg ex_memwrite,
 
   // wb control
-  output ex_memtoreg,
-  output ex_regwrite,
+  output reg ex_memtoreg,
+  output reg ex_regwrite,
 
-  output [DATA_WIDTH-1:0] ex_sextimm,
-  output [6:0] ex_funct7,
-  output [2:0] ex_funct3,
-  output [DATA_WIDTH-1:0] ex_readdata1,
-  output [DATA_WIDTH-1:0] ex_readdata2,
-  output [4:0] ex_rs1,
-  output [4:0] ex_rs2,
-  output [4:0] ex_rd
+  output reg [DATA_WIDTH-1:0] ex_sextimm,
+  output reg [6:0] ex_funct7,
+  output reg [2:0] ex_funct3,
+  output reg [DATA_WIDTH-1:0] ex_readdata1,
+  output reg [DATA_WIDTH-1:0] ex_readdata2,
+  output reg [4:0] ex_rs1,
+  output reg [4:0] ex_rs2,
+  output reg [4:0] ex_rd
 );
 
-// TODO: Implement ID/EX pipeline register module
+// \TODO: Implement ID/EX pipeline register module
+always @(posedge clk) begin
+  if (flush) begin
+    ex_PC <= 32'b0;
+    ex_pc_plus_4 <= 32'b0;
+    ex_branch <= 32'b0;
+    ex_aluop <= 32'b0;
+    ex_alusrc <= 32'b0;
+    ex_jump <= 32'b0;
+    ex_memread <= 32'b0;
+    ex_memwrite <= 32'b0;
+    ex_memtoreg <= 32'b0;
+    ex_regwrite <= 32'b0;
+    ex_sextimm <= 32'b0;
+    ex_funct7 <= 32'b0;
+    ex_funct3 <= 32'b0;
+    ex_readdata1 <= 32'b0;
+    ex_readdata2 <= 32'b0;
+    ex_rs1 <= 32'b0;
+    ex_rs2 <= 32'b0;
+    ex_rd <= 32'b0;
+  end
+  else if (idex_write) begin 
+    ex_PC <= id_PC;
+    ex_pc_plus_4 <= id_pc_plus_4;
+    ex_branch <= id_branch;
+    ex_aluop <= id_aluop;
+    ex_alusrc <= id_alusrc;
+    ex_jump <= id_jump;
+    ex_memread <= id_memread;
+    ex_memwrite <= id_memwrite;
+    ex_memtoreg <= id_memtoreg;
+    ex_regwrite <= id_regwrite;
+    ex_sextimm <= id_sextimm;
+    ex_funct7 <= id_funct7;
+    ex_funct3 <= id_funct3;
+    ex_readdata1 <= id_readdata1;
+    ex_readdata2 <= id_readdata2;
+    ex_rs1 <= id_rs1;
+    ex_rs2 <= id_rs2;
+    ex_rd <= id_rd;
+  end  
+  else begin // stall. All control signals become zero.
+    ex_branch <= 32'b0;
+    ex_aluop <= 32'b0;
+    ex_alusrc <= 32'b0;
+    ex_jump <= 32'b0;
+    ex_memread <= 32'b0;
+    ex_memwrite <= 32'b0;
+    ex_memtoreg <= 32'b0;
+    ex_regwrite <= 32'b0;
+  end
+end
 
 endmodule
