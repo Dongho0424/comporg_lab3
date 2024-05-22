@@ -10,18 +10,22 @@ module hazard #(
 )(
 
     input rstn,
-    input taken,            // flush
-    input [4:0] id_rs1,     // stall
-    input [4:0] id_rs2,     // stall
-    input [4:0] ex_rd,      // stall
-    input ex_memread,       // stall
+    // flush
+    input taken,            
+    // stall
+    input [4:0] id_rs1,     
+    input [4:0] id_rs2,     
+    input [4:0] ex_rd,      
+    input ex_memread,       
 
-    output reg ifid_flush,  // flush
-    output reg idex_flush,  // flush
-    output reg exmem_flush, // flush
-    output reg pc_write,    // stall
-    output reg ifid_write,  // stall
-    output reg idex_write   // stall
+    // flush
+    output reg ifid_flush,  
+    output reg idex_flush,  
+    output reg exmem_flush, 
+    // stall
+    output reg pc_write,    
+    output reg ifid_write,  
+    output reg idex_write   
 );
 
 always @(negedge rstn) begin // initialize

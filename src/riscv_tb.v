@@ -48,10 +48,10 @@ initial begin
   //$display($time, " DATA MEMORY");
   //for (i=0;i<128;i=i+1) $display($time, " Mem[%d]: %d (%b)", i, $signed(my_cpu.m_data_memory.mem_array[i]), my_cpu.m_data_memory.mem_array[i]);
 
-  /*
   $display($time, " HARDWARE COUNTERS");
   $display($time, " CORE_CYCLE: %d", my_cpu.CORE_CYCLE);
-
+  
+  /*
   $display($time, " NUM_COND_BRANCHES: %d", my_cpu.NUM_COND_BRANCHES);
   $display($time, " NUM_UNCOND_BRANCHES: %d", my_cpu.NUM_UNCOND_BRANCHES);
 
