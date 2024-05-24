@@ -5,3 +5,5 @@ data/*
 .DS_Store
 *.gtkw
 playground.py
+DD_assembly.txt
+DD_bin_to_assembly.py

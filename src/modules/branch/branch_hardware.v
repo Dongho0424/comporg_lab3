@@ -28,7 +28,43 @@ module branch_hardware #(
 );
 
 `ifdef GSHARE
-  // TODO: Instantiate the Gshare branch predictor
+  // \TODO: Instantiate the Gshare branch predictor
+  wire temp_pred;
+  wire temp_hit;
+  wire [DATA_WIDTH-1:0] temp_branch_target;
+
+  gshare m_gshare (
+      .clk(clk),
+      .rstn(rstn),
+      
+      .update(update_predictor),
+      .actually_taken(actually_taken),
+      .resolved_pc(resolved_pc),
+      .pc(pc),
+
+      .pred(temp_pred)
+    );
+
+  branch_target_buffer m_btb (
+      .clk(clk),
+      .rstn(rstn),
+      
+      .update(update_btb),
+      .resolved_pc(resolved_pc),
+      .resolved_pc_target(resolved_pc_target),
+      
+      .pc(pc),
+      
+      .hit(temp_hit),
+      .target_address(temp_branch_target)
+    );
+
+  always @(*) begin
+    pred = temp_pred;
+    hit = temp_hit;
+    branch_target = temp_branch_target;
+  end
+  
 `endif
 
 `ifdef PERCEPTRON

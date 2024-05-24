@@ -16,7 +16,7 @@ module data_memory #(
 
   // memory
   // memory cell의 크기가 32b인 data_mem.
-  // cell의 개수는 2^8=64개
+  // cell의 개수는 2^14
   reg [DATA_WIDTH-1:0] mem_array [0:2**MEM_ADDR_SIZE-1]; // change memory size
   initial $readmemh("data/data_memory.mem", mem_array);
   // wire reg for writedata

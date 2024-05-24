@@ -12,9 +12,13 @@ module exmem_reg #(
   //////////////////////////////////////
   input clk,
 
+  // branch prediction
+  input [DATA_WIDTH-1:0] ex_PC,
   input [DATA_WIDTH-1:0] ex_pc_plus_4,
   input [DATA_WIDTH-1:0] ex_pc_target,
   input ex_taken,
+  input ex_branch,
+  input ex_pred,
 
   // mem control
   input ex_memread,
@@ -33,9 +37,14 @@ module exmem_reg #(
   //////////////////////////////////////
   // Outputs
   //////////////////////////////////////
+
+  // branch prediction
+  output reg [DATA_WIDTH-1:0] mem_PC,
   output reg [DATA_WIDTH-1:0] mem_pc_plus_4,
   output reg [DATA_WIDTH-1:0] mem_pc_target,
   output reg mem_taken,
+  output reg mem_branch,
+  output reg mem_pred,
 
   // mem control
   output reg mem_memread,
@@ -55,9 +64,13 @@ module exmem_reg #(
 // \TODO: Implement EX / MEM pipeline register module
 always @(posedge clk) begin
   if (flush) begin
+    mem_PC <= 32'b0;
     mem_pc_plus_4 <= 32'b0;
     mem_pc_target <= 32'b0;
     mem_taken <= 1'b0;
+    mem_branch <= 1'b0;
+    mem_pred <= 1'b0;
+
     mem_memread <= 1'b0;
     mem_memwrite <= 1'b0;
     mem_jump <= 2'b0;
@@ -69,9 +82,13 @@ always @(posedge clk) begin
     mem_rd <= 5'b0;
   end
   else begin
+    mem_PC <= ex_PC;
     mem_pc_plus_4 <= ex_pc_plus_4;
     mem_pc_target <= ex_pc_target;
     mem_taken <= ex_taken;
+    mem_branch <= ex_branch;
+    mem_pred <= ex_pred;
+
     mem_memread <= ex_memread;
     mem_memwrite <= ex_memwrite;
     mem_jump <= ex_jump;

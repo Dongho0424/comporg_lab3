@@ -11,7 +11,7 @@ module hazard #(
 
     input rstn,
     // flush
-    input taken,            
+    input resolve,            
     // stall
     input [4:0] id_rs1,     
     input [4:0] id_rs2,     
@@ -42,7 +42,7 @@ assign stall = (ex_memread && (id_rs1 == ex_rd) && (id_rs1 != 0)) ||
                (ex_memread && (id_rs2 == ex_rd) && (id_rs2 != 0));
 
 always @(*) begin
-    if (taken) begin // flush logic
+    if (resolve) begin // flush logic
         ifid_flush = 1'b1;
         idex_flush = 1'b1;
         exmem_flush = 1'b1;
