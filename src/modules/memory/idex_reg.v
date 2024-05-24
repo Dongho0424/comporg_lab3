@@ -43,6 +43,7 @@ module idex_reg #(
 
   // branch prediction
   input id_pred,
+  input [DATA_WIDTH-1:0] id_pred_PC_target,
 
   //////////////////////////////////////
   // Outputs
@@ -75,7 +76,8 @@ module idex_reg #(
   output reg [4:0] ex_rd,
 
   // branch prediction
-  output reg ex_pred
+  output reg ex_pred,
+  output reg [DATA_WIDTH-1:0] ex_pred_PC_target
 );
 
 // \TODO: Implement ID/EX pipeline register module
@@ -101,6 +103,7 @@ always @(posedge clk) begin
     ex_rs2 <= 32'b0;
     ex_rd <= 32'b0;
     ex_pred <= 1'b0;
+    ex_pred_PC_target <= 32'b0;
   end
   else if (idex_write) begin 
     ex_PC <= id_PC;
@@ -123,6 +126,7 @@ always @(posedge clk) begin
     ex_rs2 <= id_rs2;
     ex_rd <= id_rd;
     ex_pred <= id_pred;
+    ex_pred_PC_target <= id_pred_PC_target;
   end  
   else begin // stall. All control signals become zero.
     ex_branch <= 32'b0;

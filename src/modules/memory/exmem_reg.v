@@ -19,6 +19,7 @@ module exmem_reg #(
   input ex_taken,
   input ex_branch,
   input ex_pred,
+  input [DATA_WIDTH-1:0] ex_pred_PC_target,
 
   // mem control
   input ex_memread,
@@ -45,6 +46,7 @@ module exmem_reg #(
   output reg mem_taken,
   output reg mem_branch,
   output reg mem_pred,
+  output reg [DATA_WIDTH-1:0] mem_pred_PC_target,
 
   // mem control
   output reg mem_memread,
@@ -70,6 +72,7 @@ always @(posedge clk) begin
     mem_taken <= 1'b0;
     mem_branch <= 1'b0;
     mem_pred <= 1'b0;
+    mem_pred_PC_target <= 32'b0;
 
     mem_memread <= 1'b0;
     mem_memwrite <= 1'b0;
@@ -88,6 +91,7 @@ always @(posedge clk) begin
     mem_taken <= ex_taken;
     mem_branch <= ex_branch;
     mem_pred <= ex_pred;
+    mem_pred_PC_target <= ex_pred_PC_target;
 
     mem_memread <= ex_memread;
     mem_memwrite <= ex_memwrite;

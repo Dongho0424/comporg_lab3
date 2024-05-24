@@ -21,6 +21,7 @@ module ifid_reg #(
 
   // branch prediction
   input if_pred,
+  input [DATA_WIDTH-1:0] if_pred_PC_target,
 
   //////////////////////////////////////
   // Outputs
@@ -30,7 +31,8 @@ module ifid_reg #(
   output reg [DATA_WIDTH-1:0] id_instruction,
 
   // branch prediction
-  output reg id_pred
+  output reg id_pred,
+  output reg [DATA_WIDTH-1:0] id_pred_PC_target
 );
 
 // \TODO: Implement IF/ID pipeline register module
@@ -40,12 +42,14 @@ always @(posedge clk) begin
     id_pc_plus_4 <= 32'b0;
     id_instruction <= 32'b0;
     id_pred <= 1'b0;
+    id_pred_PC_target <= 32'b0;
   end
   else if (ifid_write) begin
     id_PC <= if_PC;
     id_pc_plus_4 <= if_pc_plus_4;
     id_instruction <= if_instruction;
     id_pred <= if_pred;
+    id_pred_PC_target <= if_pred_PC_target;
   end
   // else: stall
 end  
