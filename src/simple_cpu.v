@@ -39,9 +39,9 @@ wire pc_write;
 
 // Branch Hardware related
 wire [DATA_WIDTH-1:0] branch_hw_pc; // conditional pc for branch hw
-wire hit; // BTB hit
-wire temp_pred; // temp wire from branch predictor
-wire if_pred; // BTB hit and pred as Taken
+wire if_hit; // BTB hit
+wire temp_pred; // pred from branch predictor
+wire if_pred; // pred condtioned by whether jump
 wire [DATA_WIDTH-1:0] if_pred_PC_target; // from BTB, predicted target address
 
 ////////////////
@@ -83,6 +83,7 @@ wire ifid_write;
 
 // resolve PC logic
 wire id_pred;
+wire id_hit;
 wire [DATA_WIDTH-1:0] id_pred_PC_target;
 
 ////////////////
@@ -136,6 +137,7 @@ wire idex_write;
 
 // resolve PC logic
 wire ex_pred;
+wire ex_hit;
 wire [DATA_WIDTH-1:0] ex_pred_PC_target;
 
 ////////////////
@@ -154,16 +156,21 @@ wire [4:0] mem_rd;
 
 wire [DATA_WIDTH-1:0] mem_readdata;
 
+// forwarding
+wire [DATA_WIDTH-1:0] mem_forwarding_value;
+
 // resolve PC logic
 wire [DATA_WIDTH-1:0] mem_PC; // resolved PC
-wire [DATA_WIDTH-1:0] mem_pc_plus_4; // resolve_pc_target when pred T, actually NT
-wire [DATA_WIDTH-1:0] mem_pc_target; // resolve_pc_target when pred NT, actually T
-wire [DATA_WIDTH-1:0] resolved_PC_target; 
+wire [DATA_WIDTH-1:0] mem_pc_plus_4; // resolved_PC_target when pred T, actually NT
+wire [DATA_WIDTH-1:0] mem_pc_target; // resolved_PC_target when pred NT, actually T
+reg [DATA_WIDTH-1:0] resolved_PC_target; 
 wire mem_pred;
+wire mem_hit;
 wire [DATA_WIDTH-1:0] mem_pred_PC_target;
 wire mem_taken; // actually taken
 wire mem_branch; 
-wire resolve; // determine next PC as resolved one
+reg resolve; // determine next PC as resolved one
+wire is_same_target; // check if actually taken target pc is same as predicted target pc
 wire update_BTB; // update BTB
 wire update_predictor; // update branch predictor
 
@@ -218,10 +225,8 @@ instruction_memory m_instruction_memory(
 /// Branch Prediction 
 
 // next PC src
-assign if_pred = hit & temp_pred;
-
 mux_4x1 m_pc_src_mux(
-  .select  ({resolve, if_pred}),
+  .select  ({resolve, if_hit&if_pred}),
   .in1  (if_pc_plus_4), // BTB miss or not taken predict
   .in2  (if_pred_PC_target), // taken predict, predicted next PC target
   .in3  (resolved_PC_target), // resolved PC target from MEM stage if resolve signal
@@ -239,6 +244,10 @@ mux_2x1 m_branch_hw_mux(
   .out  (branch_hw_pc)
 );
 
+// if jump inst, always pred as Taken
+// opcode[6]&opcode[2]: 1 for jump, 0 for others
+assign if_pred = if_instruction[6]&if_instruction[2] ? 1'b1 : temp_pred;
+
 // Branch Hardware
 branch_hardware m_branch_hardware(
   .clk                (clk),
@@ -251,7 +260,7 @@ branch_hardware m_branch_hardware(
   .resolved_pc_target (resolved_PC_target),
   .pc                 (branch_hw_pc),
 
-  .hit                (hit),
+  .hit                (if_hit),
   .pred               (temp_pred),
   .branch_target      (if_pred_PC_target)
 );
@@ -265,12 +274,14 @@ ifid_reg m_ifid_reg(
   .if_pc_plus_4   (if_pc_plus_4),
   .if_instruction (if_instruction),
   .if_pred        (if_pred),
+  .if_hit         (if_hit),
   .if_pred_PC_target (if_pred_PC_target),
 
   .id_PC          (id_PC),
   .id_pc_plus_4   (id_pc_plus_4),
   .id_instruction (id_instruction),
   .id_pred        (id_pred),
+  .id_hit         (id_hit),
   .id_pred_PC_target (id_pred_PC_target)
 );
 
@@ -367,6 +378,7 @@ idex_reg m_idex_reg(
   .id_rs2       (id_rs2),
   .id_rd        (id_rd),
   .id_pred      (id_pred),
+  .id_hit       (id_hit),
   .id_pred_PC_target (id_pred_PC_target),
 
   .ex_PC        (ex_PC),
@@ -389,6 +401,7 @@ idex_reg m_idex_reg(
   .ex_rs2       (ex_rs2),
   .ex_rd        (ex_rd),
   .ex_pred      (ex_pred),
+  .ex_hit       (ex_hit),
   .ex_pred_PC_target (ex_pred_PC_target)
 );
 
@@ -470,7 +483,7 @@ mux_2x1 m_alu_src_mux(
 mux_3x1 m_forward_a_mux(
   .select  (forward_a),
   .in1  (ex_readdata1),
-  .in2  (mem_alu_result),
+  .in2  (mem_forwarding_value),
   .in3  (wb_writedata),
 
   .out  (ex_alu_in_a_temp)
@@ -479,12 +492,13 @@ mux_3x1 m_forward_a_mux(
 mux_3x1 m_forward_b_mux(
   .select  (forward_b),
   .in1  (ex_readdata2),
-  .in2  (mem_alu_result),
+  .in2  (mem_forwarding_value),
   .in3  (wb_writedata),
 
   .out  (ex_alu_in_b_temp)
 );
 
+// data hazard forwarding
 forwarding m_forwarding(
   .ex_rs1       (ex_rs1),
   .ex_rs2       (ex_rs2),
@@ -492,6 +506,7 @@ forwarding m_forwarding(
   .mem_rd       (mem_rd),
   .wb_regwrite  (wb_regwrite),
   .wb_rd        (wb_rd),
+
   .forward_a    (forward_a),
   .forward_b    (forward_b)
 );
@@ -507,6 +522,7 @@ exmem_reg m_exmem_reg(
   .ex_taken       (ex_taken),     
   .ex_branch      (ex_branch),
   .ex_pred        (ex_pred), 
+  .ex_hit         (ex_hit),
   .ex_pred_PC_target (ex_pred_PC_target),
   .ex_jump        (ex_jump),
   .ex_memread     (ex_memread),
@@ -524,6 +540,7 @@ exmem_reg m_exmem_reg(
   .mem_taken      (mem_taken),     
   .mem_branch     (mem_branch),
   .mem_pred       (mem_pred),
+  .mem_hit        (mem_hit),
   .mem_pred_PC_target (mem_pred_PC_target),
   .mem_jump       (mem_jump),
   .mem_memread    (mem_memread),
@@ -554,6 +571,57 @@ data_memory m_data_memory(
   .read_data   (mem_readdata)
 );
 
+// forwarding
+// if jump, forwarding value is pc+4, otherwise alu result
+mux_2x1 m_mem_forwarding_mux(
+  .select (mem_jump[1]),
+  .in1    (mem_alu_result),
+  .in2    (mem_pc_plus_4),
+
+  .out    (mem_forwarding_value)
+);
+
+/// resolve PC logic, modules
+assign update_BTB = (mem_taken & mem_branch) | mem_jump[1];
+assign update_predictor = mem_branch;
+assign is_same_target = mem_pc_target == mem_pred_PC_target;
+always @(*) begin 
+  if (mem_branch == 1'b1) begin // branch
+    casex ({mem_pred&mem_hit, mem_taken, is_same_target})
+      3'b00x: begin
+        resolve = 1'b0;
+        resolved_PC_target = 32'h0000_0000;
+      end
+      3'b01x: begin
+        resolve = 1'b1;
+        resolved_PC_target = mem_pc_target;
+      end
+      3'b10x: begin
+        resolve = 1'b1;
+        resolved_PC_target = mem_pc_plus_4;
+      end
+      3'b110: begin
+        resolve = 1'b1;
+        resolved_PC_target = mem_pc_target;
+      end
+      3'b111: begin
+        resolve = 1'b0;
+        resolved_PC_target = mem_pc_target; // for BTB update
+      end
+    endcase
+  end
+  else if (mem_jump[1]) begin // jump
+    resolved_PC_target = mem_pc_target;
+    // resolve = ~mem_hit & ~is_same_target;
+    resolve = ~(mem_hit & is_same_target);
+  end
+  else begin // others
+    resolve = 1'b0;
+    resolved_PC_target = 32'h0000_0000;  
+  end
+
+end
+
 /* forward to MEM/WB stage registers */
 memwb_reg m_memwb_reg(
   // \TODO: Add flush or stall signal if it is needed
@@ -573,24 +641,6 @@ memwb_reg m_memwb_reg(
   .wb_readdata    (wb_readdata),
   .wb_alu_result  (wb_alu_result),
   .wb_rd          (wb_rd)
-);
-
-// resolve PC modules
-assign update_BTB = (mem_taken & mem_branch) | mem_jump[1];
-assign update_predictor = mem_branch;
-assign resolve = (mem_taken != mem_pred) || (mem_taken && mem_pred && (mem_pred_PC_target != mem_pc_target) );
-
-mux_4x1 m_resolved_pc_target_mux(
-  .select  ({mem_pred, mem_taken}),
-  .in1  (32'h0000_0000), // dummy
-  .in2  (mem_pc_target), // when pred NT, actually T
-  .in3  (mem_pc_plus_4), // when pred T, actually NT
-  // Actually, not needed for resolving misprediction for pc_target
-  // But, it is used for update BTB as resolved target PC
-  // (As actually taken, we update BTB with resolved target PC)
-  .in4  (mem_pc_target), 
-
-  .out  (resolved_PC_target)
 );
 
 //////////////////////////////////////////////////////////////////////////////////

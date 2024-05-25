@@ -73,7 +73,7 @@ module gshare #(
     if (pc == 32'h0000_0000) begin
       pred = 1'b0;
     end
-    // branch or jump instruction
+    // branch instruction, depend on PHT
     else begin
       access_xored = BHR_snapshot ^ access_idx;
       // 2bit saturating counter
@@ -94,7 +94,7 @@ module gshare #(
   // update on negedge
   always @(negedge clk) begin
     if (update == 1'b1) begin 
-      update_xored = BHR ^ update_idx;
+      update_xored = BHR_snapshot ^ update_idx;
       // update PHT
       // - update cnt given xored index
       // 2bit saturating counter
@@ -107,41 +107,8 @@ module gshare #(
 
       // update BHR
       // - shift left
-      BHR <= {BHR[6:0], actually_taken};
+      BHR = {BHR_snapshot[6:0], actually_taken};
     end
   end
 
 endmodule
-  // reg [INDEX_WIDTH-1:0] next_BHR;
-  // reg [COUNTER_WIDTH-1:0] next_cnt;
-  
-  // udpate on negedge
-  // always @(negedge clk) begin
-  //   if (~rstn) begin // intialize
-  //     BHR <= 8'b0000_0000;
-  //     PHT #TODO
-  //   end
-  //   else if (update) begin 
-  //     // update PHT
-  //     PHT[update_xored] <= next_cnt;
-  //     // update BHR
-  //     BHR <= next_BHR;
-  //   end
-  // end
-
-  // always @(*) begin
-  //   // update PHT
-  //   // - update cnt given xored index
-  //   // 2bit saturating counter
-  //   case (PHT[update_xored])
-  //     2'b00: pred <= 1'b0; // strongly not taken
-  //     2'b01: pred <= 1'b0; // weakly not taken
-  //     2'b10: pred <= 1'b1; // weakly taken
-  //     2'b11: pred <= 1'b1; // strongly taken
-  //   endcase
-
-  //   // update BHR
-  //   // - shift left
-  //   BHR <= {BHR[6:0], actually_taken};
-
-  // end

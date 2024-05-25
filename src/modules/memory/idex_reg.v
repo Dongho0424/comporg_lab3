@@ -43,6 +43,7 @@ module idex_reg #(
 
   // branch prediction
   input id_pred,
+  input id_hit,
   input [DATA_WIDTH-1:0] id_pred_PC_target,
 
   //////////////////////////////////////
@@ -77,6 +78,7 @@ module idex_reg #(
 
   // branch prediction
   output reg ex_pred,
+  output reg ex_hit,
   output reg [DATA_WIDTH-1:0] ex_pred_PC_target
 );
 
@@ -103,6 +105,7 @@ always @(posedge clk) begin
     ex_rs2 <= 32'b0;
     ex_rd <= 32'b0;
     ex_pred <= 1'b0;
+    ex_hit <= 1'b0;
     ex_pred_PC_target <= 32'b0;
   end
   else if (idex_write) begin 
@@ -126,6 +129,7 @@ always @(posedge clk) begin
     ex_rs2 <= id_rs2;
     ex_rd <= id_rd;
     ex_pred <= id_pred;
+    ex_hit <= id_hit;
     ex_pred_PC_target <= id_pred_PC_target;
   end  
   else begin // stall. All control signals become zero.
@@ -139,6 +143,7 @@ always @(posedge clk) begin
     ex_regwrite <= 32'b0;
     ex_u_type <= 32'b0;
     ex_pred <= 1'b0;
+    ex_hit <= 1'b0;
   end
 end
 
