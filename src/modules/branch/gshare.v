@@ -51,7 +51,7 @@ module gshare #(
   /// initialize  ///
   ///////////////////
 
-   always @(negedge rstn) begin
+  always @(negedge rstn) begin
     BHR = 8'b0000_0000;
     for (i = 0; i < NUM_ENTRIES; i=i+1) begin
       PHT[i] = 2'b01;
