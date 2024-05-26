@@ -612,7 +612,6 @@ always @(*) begin
   end
   else if (mem_jump[1]) begin // jump
     resolved_PC_target = mem_pc_target;
-    // resolve = ~mem_hit & ~is_same_target;
     resolve = ~(mem_hit & is_same_target);
   end
   else begin // others

@@ -33,8 +33,6 @@ module branch_target_buffer #(
   wire [INDEX_WIDTH-1:0] access_idx;
   reg valid;
   reg same_tag;
-  // TODO: temp reg fix
-  reg [TAG_WIDTH-1:0] temp_prev_tag;
 
   wire [TAG_WIDTH-1:0] update_tag;
   wire [INDEX_WIDTH-1:0] update_idx;
@@ -75,7 +73,6 @@ module branch_target_buffer #(
     // branch or jump instruction
     else begin
       valid = BTB[access_idx][54];
-      temp_prev_tag = BTB[access_idx][53:32];
       same_tag = (BTB[access_idx][53:32] == access_tag);
       target_address = BTB[access_idx][31:0];
       hit = same_tag & valid;
